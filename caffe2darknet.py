@@ -171,6 +171,11 @@ def _print_cfg_nicely(blocks):
             out_widths.append(1)
             out_heights.append(1)
             out_filters.append(prev_filters)
+        elif block['type'] == 'flatten':
+            print('%5d %-6s' % (ind, 'flatten'))
+            out_widths.append(1)
+            out_heights.append(1)
+            out_filters.append(prev_width * prev_height * prev_filters)
         else:
             print('unknown type %s' % (block['type']))
 
@@ -467,6 +472,14 @@ class Caffe2Darknet:
                 block = OrderedDict()
                 block['type'] = 'softmax'
                 block['groups'] = 1
+                top = layer['top']
+                layer_id[top] = len(blocks)
+                blocks.append(block)
+                i = i + 1
+            elif layer['type'] == 'Flatten':
+                assert (layer_id[layer['bottom']] == len(blocks) - 1)
+                block = OrderedDict()
+                block['type'] = 'flatten'
                 top = layer['top']
                 layer_id[top] = len(blocks)
                 blocks.append(block)
